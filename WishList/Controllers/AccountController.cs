@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WishList.Models;
+using WishList.Models.AccountViewModels;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -23,10 +24,38 @@ namespace WishList.Controllers
             _signInManager = signInManager;
         }
 
-        // GET: /<controller>/
-        public IActionResult Index()
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Register()
         {
-            return View();
+            return View("Register");
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public IActionResult Register(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                ApplicationUser user = new ApplicationUser()
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                };
+
+                string userPassword = model.Password;
+
+                var result = _userManager.CreateAsync(user, userPassword);
+                if (!result.Result.Succeeded) 
+                {
+                    foreach (var error in result.Result.Errors)
+                    {
+                        ModelState.AddModelError(userPassword, error.Description);
+                    }
+                    return View(model);
+                }
+            }
+            return View(model);
         }
     }
 }
