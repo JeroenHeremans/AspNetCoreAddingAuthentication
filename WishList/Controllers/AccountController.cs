@@ -12,50 +12,51 @@ using WishList.Models.AccountViewModels;
 
 namespace WishList.Controllers
 {
-    [Authorize]
-    public class AccountController : Controller
-    {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+	[Authorize]
+	public class AccountController : Controller
+	{
+		private readonly UserManager<ApplicationUser> _userManager;
+		private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-        }
+		public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+		{
+			_userManager = userManager;
+			_signInManager = signInManager;
+		}
 
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Register()
-        {
-            return View("Register");
-        }
+		[HttpGet]
+		[AllowAnonymous]
+		public IActionResult Register()
+		{
+			return View("Register");
+		}
 
-        [HttpPost]
-        [AllowAnonymous]
-        public IActionResult Register(RegisterViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                ApplicationUser user = new ApplicationUser()
-                {
-                    UserName = model.Email,
-                    Email = model.Email,
-                };
+		[HttpPost]
+		[AllowAnonymous]
+		public IActionResult Register(RegisterViewModel model)
+		{
+			if (!ModelState.IsValid)
+				return View("Register", model);
 
-                string userPassword = model.Password;
+			ApplicationUser user = new ApplicationUser()
+			{
+				UserName = model.Email,
+				Email = model.Email,
+			};
 
-                var result = _userManager.CreateAsync(user, userPassword);
-                if (!result.Result.Succeeded) 
-                {
-                    foreach (var error in result.Result.Errors)
-                    {
-                        ModelState.AddModelError(userPassword, error.Description);
-                    }
-                    return View(model);
-                }
-            }
-            return View(model);
-        }
-    }
+			string userPassword = model.Password;
+
+			var result = _userManager.CreateAsync(user, userPassword);
+			if (!result.Result.Succeeded)
+			{
+				foreach (var error in result.Result.Errors)
+				{
+					ModelState.AddModelError(userPassword, error.Description);
+				}
+				return View("Register", model);
+			}
+
+			return RedirectToAction("Index", "Home");
+		}
+	}
 }
